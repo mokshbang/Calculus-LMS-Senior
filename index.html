@@ -710,7 +710,7 @@
 //  Replace SHEET_URL with your Google Apps Script Web App URL
 //  after you deploy it (instructions in README)
 // ══════════════════════════════════════════
-const SHEET_URL = "https://script.google.com/macros/library/d/1t-iENlGsWmP19nASgrj11Myl7xi8MVqIfzCCe-tIC7EjidS2qNNDJURN/4";
+const SHEET_URL = "https://script.google.com/macros/library/d/1t-iENlGsWmP19nASgrj11Myl7xi8MVqIfzCCe-tIC7EjidS2qNNDJURN/5";
 
 // ══════════════════════════════════════════
 //  COURSE DATA
@@ -1176,26 +1176,21 @@ async function saveScore(pct) {
   status.textContent = '⏳ Saving your score...';
 
   try {
-    const response = await fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        name,
-        topic: currentTopic.title,
-        score: pct,
-        correct: score,
-        total: currentQuiz.length,
-        date: new Date().toLocaleString()
-      })
+    const params = new URLSearchParams({
+      name: name,
+      topic: currentTopic.title,
+      score: pct,
+      correct: score,
+      total: currentQuiz.length,
+      date: new Date().toLocaleString()
     });
 
-    const result = await response.json();
+    await fetch(SHEET_URL + '?' + params.toString(), {
+      method: 'GET',
+      mode: 'no-cors'
+    });
 
-    if (result.result === "success") {
-      status.textContent = '✅ Score saved to grade sheet!';
-    } else {
-      status.textContent = '⚠️ Something went wrong: ' + result.message;
-    }
+    status.textContent = '✅ Score saved to grade sheet!';
 
   } catch (e) {
     status.textContent = '⚠️ Could not save. Error: ' + e.message;
