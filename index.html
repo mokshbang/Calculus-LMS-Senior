@@ -710,7 +710,7 @@
 //  Replace SHEET_URL with your Google Apps Script Web App URL
 //  after you deploy it (instructions in README)
 // ══════════════════════════════════════════
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzqvRJydIlWnFut2NopRsDMawGuycNAp0kXc7sy-TDwAqwVA8Utl0R8mRdDY2XOTaEXfA/exec";
+const SHEET_URL = "https://script.google.com/macros/library/d/1t-iENlGsWmP19nASgrj11Myl7xi8MVqIfzCCe-tIC7EjidS2qNNDJURN/4";
 
 // ══════════════════════════════════════════
 //  COURSE DATA
@@ -1169,16 +1169,16 @@ async function saveScore(pct) {
   const name = document.getElementById('studentName').value.trim() || 'Anonymous';
 
   if (SHEET_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
-    status.innerHTML = '⚠️ Score saving not set up yet. <a href="#" style="color:var(--blue)">See setup guide.</a>';
+    status.innerHTML = '⚠️ Score saving not configured yet.';
     return;
   }
 
   status.textContent = '⏳ Saving your score...';
+
   try {
-    await fetch(SHEET_URL, {
+    const response = await fetch(SHEET_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         name,
         topic: currentTopic.title,
@@ -1188,9 +1188,17 @@ async function saveScore(pct) {
         date: new Date().toLocaleString()
       })
     });
-    status.textContent = '✅ Score saved to grade sheet!';
+
+    const result = await response.json();
+
+    if (result.result === "success") {
+      status.textContent = '✅ Score saved to grade sheet!';
+    } else {
+      status.textContent = '⚠️ Something went wrong: ' + result.message;
+    }
+
   } catch (e) {
-    status.textContent = '⚠️ Could not save score. Check your connection.';
+    status.textContent = '⚠️ Could not save. Error: ' + e.message;
   }
 }
 
